@@ -1,3 +1,11 @@
+# Additions
+
+Forked changed:
+
+1. clips.getClips()
+1. games.getTopGames()
+1. pagination for videos.getVideos()
+
 # Twitch-Helix-API
 
 [![npm Stats](https://nodei.co/npm/twitch-helix-api.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/twitch-helix-api)
