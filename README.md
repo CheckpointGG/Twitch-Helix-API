@@ -12,6 +12,7 @@ Twitch-Helix-API is a NPM library designed to make use of the Twitch Helix API v
 - Get Streams Metadata
 - Get Users
 - Get User Follows
+- Get User Tags
 - Update User
 - Get Videos
 
@@ -216,6 +217,26 @@ You may send these optional parameters in the object:
 |`after`|string|Cursor for forward pagination: tells the server where to start fetching the next set of results, in a multi-page response.|
 |`before`|string|Cursor for backward pagination: tells the server where to start fetching the next set of results, in a multi-page response.|
 |`first`|integer|Maximum number of objects to return. Maximum: 100. Default: 20.|
+
+##### Get User Tags
+
+Usage:
+
+```
+api.users.getUserTags({ ... }).then(function(data) {
+    ...
+});
+```
+
+This request accepts no authentication.
+
+You must send one or more of these parameters in the object:
+
+|**Name**|**Type**|**Description**|
+|--- |--- |--- |
+|`id`|string|User ID. Limit: 1.|
+
+This request has no optional parameters.
 
 ##### Update Users
 
