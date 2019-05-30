@@ -5,6 +5,7 @@ Forked changed:
 1. clips.getClips()
 1. games.getTopGames()
 1. pagination for videos.getVideos()
+1. added ratelimit details into response object
 
 # Twitch-Helix-API
 
