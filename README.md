@@ -49,6 +49,7 @@ Begin by importing the library and setting a Client ID. Example:
 var api = require("twitch-helix-api");
 
 api.clientID = "XXXXXXXXXXXXXXXXXXXXX";
+api.token = "XXXXXXXXXXXXXXXXXXXXX";
 ```
 
 ### Requests
