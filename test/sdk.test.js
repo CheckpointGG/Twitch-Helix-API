@@ -10,8 +10,15 @@ describe("Twitch API", () => {
         const response = await TwitchApi.streams.getStreams({
             first: 1
         });
-
         expect(response.code).toEqual(200);
     });
+
+    it("should get top games", async () => {
+        
+        const response = await TwitchApi.games.getTopGames({
+            first: 1
+        });
+        expect(response.code).toEqual(200);
+    })
 
 })
