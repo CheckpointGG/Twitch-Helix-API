@@ -1,5 +1,6 @@
 exports.clientID =  "";
 exports.token =  "";
+exports.apiUrl = "";
 exports.authentication = require("./lib/authentication");
 exports.games = require("./lib/games");
 exports.streams = require("./lib/streams");
