@@ -2,7 +2,7 @@ const TwitchApi = require("../index");
 
 describe("Twitch API", () => {
 
-    TwitchApi.apiUrl = "https://ubfoa6rl3h.execute-api.us-east-2.amazonaws.com";
+    TwitchApi.apiUrl = "https://lmqdy3sms6.execute-api.us-east-2.amazonaws.com/dev";
 
 
     it("should get streams", async () => {
