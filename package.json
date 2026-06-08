@@ -3,6 +3,9 @@
   "version": "1.0.2",
   "description": "A NPM library designed to make use of the Twitch Helix API easier!",
   "main": "index.js",
+  "engines": {
+    "node": "^20.0.0"
+  },
   "dependencies": {
     "jest": "^26.0.1",
     "query-string": "^5.0.1",
