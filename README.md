@@ -1,11 +1,94 @@
-# Additions
+<!-- ==================== BEGIN GEEIQ BLOCK ==================== -->
+<!-- Added by GeeIQ/CheckpointGG. Everything below the END GEEIQ BLOCK marker is       -->
+<!-- upstream Glyciant/Twitch-Helix-API content, preserved verbatim and not edited.    -->
 
-Forked changed:
+# Twitch Helix API Client (GeeIQ fork)
 
-1. clips.getClips()
-1. games.getTopGames()
-1. pagination for videos.getVideos()
-1. added ratelimit details into response object
+> _Node client library that builds Twitch Helix request URLs, attaches Twitch auth headers, validates parameters, and normalises every response into one payload envelope._
+
+- **Type:** Internal library (Node, CommonJS) — a fork of a third-party npm package
+- **Purpose:** Give GeeIQ services one place to call Twitch Helix from, with every request path relative to a configurable base URL so the same client can talk to Twitch directly or to an internal proxy
+- **Status:** Maintenance — the default branch (`master`) has not changed since 2020-06-30
+
+This is a **GeeIQ fork of [`Glyciant/Twitch-Helix-API`](https://github.com/Glyciant/Twitch-Helix-API)**. It is **not deployed** and, from the default branch, **not published to any registry** — it is consumed as a **git dependency**.
+
+**Full GeeIQ documentation: [`docs/geeiq.md`](./docs/geeiq.md)** — name chain, install and import surface, the complete export inventory with signatures, the authentication model, release status, the fork delta, and configuration.
+
+---
+
+## Read this before following the upstream instructions below
+
+The upstream text is preserved unedited, and three of its statements are **not true of this fork**:
+
+| Upstream statement | What is actually the case |
+|---|---|
+| `npm install --save twitch-helix-api` (Installation) | That installs **upstream's public package from npmjs.com**, which is a different artefact from this fork. GeeIQ consumers install from git — see [Installing](./docs/geeiq.md#installing). |
+| "Get Access Token (**Kraken Endpoint**)" (About) | `lib/authentication.js` has posted to `https://id.twitch.tv/oauth2/token` since commit `891e8aa` (2020-04-07), and `checkToken` calls `https://id.twitch.tv/oauth2/validate`. No Kraken URL remains anywhere in the code. |
+| The About endpoint list | It omits `clips.getClips` and `games.getTopGames`, both added by this fork. The complete set of twelve is in [Endpoints constructed](#endpoints-constructed) below. |
+
+Two further fork behaviours the upstream text does not describe:
+
+- **Every Helix path is built from a mutable `apiUrl` property** (`index.js`), which defaults to `https://api.twitch.tv/helix`. Setting `apiUrl` re-points all ten Helix calls at another base — that is what commit `e43ebc3`, "Added all twitch endpoints to the proxy", accomplished. The two `authentication.*` calls are the exception: their URLs are hardcoded to `id.twitch.tv` and always go direct.
+- **Responses carry a `ratelimit` field** alongside `code`/`status`/`message`/`response`, populated from Twitch's `ratelimit-limit` / `ratelimit-remaining` / `ratelimit-reset` headers when present.
+
+---
+
+## What this fork changed
+
+| Change | Commit |
+|---|---|
+| `clips.getClips()`, `games.getTopGames()`, pagination for `videos.getVideos()` | `7b426a9` (2019-03-01) |
+| `users.getUserTags()` | `4e39303` (2019-03-27) |
+| `ratelimit` details on the response object | `a250c82`, `52038c1` (2019-05-30) |
+| Module-level `token`, so a token need not be passed per call; auth URLs moved from Kraken to `id.twitch.tv`; null-safety in `generatePayload` and `applyRateLimit` | `891e8aa` (2020-04-07) |
+| Configurable `apiUrl`, and all remaining hardcoded Helix URLs made relative to it | `e53861e`…`e43ebc3` (2020-06-22 → 2020-06-30) |
+
+---
+
+## Endpoints constructed
+
+**This is the load-bearing artefact of this repo.** Twitch Helix route names for the estate are assembled *here*, not in the calling service, so this table is the only place these paths are written down.
+
+`{apiUrl}` is the value of `index.apiUrl`, default `https://api.twitch.tv/helix`. Consumers may reassign it, in which case these paths are appended to whatever base they set.
+
+| Export | Method | Path constructed | Query parameters sent |
+|---|---|---|---|
+| `streams.getStreams` | GET | `{apiUrl}/streams?` | `after`, `before`, `community_id`, `first`, `game_id`, `language`, `type`, `user_id`, `user_login` |
+| `streams.getStreamsMetadata` | GET | `{apiUrl}/streams/metadata?` | `after`, `before`, `community_id`, `first`, `game_id`, `language`, `type`, `user_id`, `user_login` |
+| `users.getUsers` | GET | `{apiUrl}/users?` | `id`, `login` |
+| `users.getUsersFollows` | GET | `{apiUrl}/users/follows?` | `from_id`, `to_id`, `first`, `after`, `before` |
+| `users.getUserTags` | GET | `{apiUrl}/streams/tags?` | `broadcaster_id` — taken from the caller's `id` argument |
+| `users.updateUser` | PUT | `{apiUrl}/users?` | `description` |
+| `videos.getVideos` | GET | `{apiUrl}/videos?` | `id`, `user_id`, `game_id`, `first`, `language`, `period`, `sort`, `type`, `after`, `before` |
+| `clips.getClips` | GET | `{apiUrl}/clips?` | `id`, `broadcaster_id`, `game_id`, `first`, `after`, `before`, `sort`, `type`, `language` |
+| `games.getGames` | GET | `{apiUrl}/games?` | `id`, `name` |
+| `games.getTopGames` | GET | `{apiUrl}/games/top?` | `before`, `after`, `first` |
+| `authentication.getAccessToken` | POST | `https://id.twitch.tv/oauth2/token?` — **hardcoded, ignores `apiUrl`** | `client_id`, `client_secret`, `redirect_uri`, `code`, `state`, `grant_type=authorization_code` |
+| `authentication.checkToken` | GET | `https://id.twitch.tv/oauth2/validate` — **hardcoded, ignores `apiUrl`** | none; the token travels in the `Authorization` header |
+
+Note that `users.getUserTags` is exported on `users` but reaches a `/streams/` path, and that `users.updateUser` is the only write.
+
+---
+
+## Export inventory
+
+`require("twitch-helix-api")` returns `index.js`, which exposes three configuration properties and six modules. Full signatures and behaviour: [`docs/geeiq.md`](./docs/geeiq.md#export-inventory).
+
+| Export | Kind | Purpose |
+|---|---|---|
+| `clientID` | string property, `""` | Sent as the `Client-ID` header on every request |
+| `token` | string property, `""` | Default bearer/OAuth token for every request |
+| `apiUrl` | string property, `https://api.twitch.tv/helix` | Base URL that all ten Helix paths are appended to |
+| `authentication` | module | `getAccessToken(data)`, `checkToken(data)` |
+| `games` | module | `getGames(data)`, `getTopGames(data)` |
+| `streams` | module | `getStreams(data)`, `getStreamsMetadata(data)` |
+| `users` | module | `getUsers(data)`, `getUsersFollows(data)`, `getUserTags(data)`, `updateUser(data)` |
+| `videos` | module | `getVideos(data)` |
+| `clips` | module | `getClips(data)` |
+
+`lib/request.js` and `lib/helpers.js` are **not** on the root export and are reachable only by deep require (`twitch-helix-api/lib/request`).
+
+<!-- ===================== END GEEIQ BLOCK ===================== -->
 
 # Twitch-Helix-API
 
